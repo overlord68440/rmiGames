@@ -17,7 +17,7 @@ public class ProdImpl extends UnicastRemoteObject implements produire
 	
 	// constructeur
 	
-	protected ProdImpl(int max_number, int max_distribue) throws RemoteException 
+	public ProdImpl(int max_number, int max_distribue) throws RemoteException 
 	{
 		super() ;
 		

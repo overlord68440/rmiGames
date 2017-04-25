@@ -17,7 +17,7 @@ public class Producteur extends Agent
 		this.ressourceName = ressourceName ;
 		 try
 	    {
-			 System.out.println("prod create") ;
+			System.out.println("prod create") ;
 			prodRess= new ProdImpl(max_number, max_distribue) ;
 		}
 			catch (RemoteException re) { System.out.println(re) ;
