@@ -3,7 +3,8 @@ import java.rmi.server.UnicastRemoteObject ;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.rmi.RemoteException ;
-
+//import java.net.InetAddress.* ;
+//import java.net.* ;
 
 public class ProdImpl extends UnicastRemoteObject implements produire
 {
@@ -61,7 +62,7 @@ public class ProdImpl extends UnicastRemoteObject implements produire
 	// timer crée les ressource
 	
 	
-	public void startProd()
+	private void startProd()
 	{
 		prodRessource.schedule(new Task() ,0 ,1000) ;
 	}
