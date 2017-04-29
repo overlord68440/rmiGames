@@ -16,17 +16,15 @@ public class ProdImpl extends UnicastRemoteObject implements produire
 	
 	// constructeur
 	
-	public ProdImpl(int max_number, int max_distribue) throws RemoteException 
+	public ProdImpl(int n ,int max_number, int max_distribue) throws RemoteException 
 	{
 		super() ;
-		
+		this.n = n ;
 		max_n = max_number ;
 		max_d = max_distribue ;
 		prodRessource = new Timer() ;
 		startProd() ;
 	}
-
-	
 
 	public int takeRessource(int number) throws RemoteException
 	{
@@ -70,7 +68,7 @@ public class ProdImpl extends UnicastRemoteObject implements produire
 		 public void run() 
 		 {
 				n = Math.min(max_n, n + (n/2)+1 ) ;
-				System.out.println("or :"+ n ) ;
+				System.out.println( "ress" + ':' + n ) ;
 		 }
 		 
 	 }

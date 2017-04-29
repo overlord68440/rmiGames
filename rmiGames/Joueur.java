@@ -1,27 +1,80 @@
-
-import java.rmi.* ;
-
+import java.lang.*;
 import java.util.* ;
-
-import java.net.MalformedURLException;
+import java.io.*;
+import java.net.*;
+import java.rmi.* ;
 
 
 public class Joueur extends Agent
 {
-	String nom ;
-	String rmiRegAddr ;
-	String port ;
-	List<String> listeJoueur ;
+
 	comportement c ;
+	
+	List<Pair> listeProd ;
+	List<Pair> victRess ;
+	List<Pair> listeJoueur  ;
+	
+	private boolean limiteRessAcc = false ;
+	private boolean tparTour = false ;
+	private boolean obsPossible = false ;
+	private boolean volPossible = false ;
+	private int maxRessourcePrenable = 5 ;
+	private int maxRessourceAccumulable = 100 ;
+	
 	public InvImpl inv ;
 	
-	public Joueur(String rmiRegAddr, String port, String nom, int comport)
+	public Joueur(String rmiRegAddr, String port)
 	{
 		this.rmiRegAddr = rmiRegAddr ;
 		this.port = port ;
+		getGameSettings() ;
 	}
 	
+	public void initComportement(int n)
+	{
+		switch(n)
+		{
+			case 1 :
+				c = new Humain();
+			break ;
+			case 2 :
+				c = new Humain();
+			break ;
+			case 3 :
+				c = new Humain();
+			break ;
+			case 4 :
+				c = new Humain();
+			break ;
+			case 5 :
+				c = new Humain();
+			break ;
+			default :
+				c = new Humain();
+			break ;			
+		}
+	}
 	
+	public void getUsefulData(gameData g)
+	{
+		try 
+		{	
+			listeProd = g.getListProd() ;
+			victRess = g.getVictRess();
+			listeJoueur = g.getListJoueur() ;
+			limiteRessAcc = g.getLimiteRessAcc() ;
+			tparTour = g.getTourParTour() ;
+			obsPossible = g.getObsPossible()  ;
+			volPossible = g.getVolPossible() ;
+			maxRessourcePrenable = g.getMaxRessourcePrenable() ;
+			maxRessourceAccumulable = g.getMaxRessourceAccumulable() ;
+			nomAgent = g.addNewPlayer() ;
+			System.out.println("bonjour " + nomAgent) ;
+			initComportement(g.getComportement(nomAgent)) ;
+		}
+		catch (RemoteException re) { System.out.println(re) ; }
+	}
+
 	public  int getRess(String s, int n) 
 	{
 		try 
@@ -49,6 +102,7 @@ public class Joueur extends Agent
 
 		return null ;
 	}
+	
 	public int voler(String j,String ress, int nbr) 
 	{
 		try 
@@ -63,26 +117,28 @@ public class Joueur extends Agent
 		return 0 ;
 	}
 	
-	public static void main(String [] args)
+	public void distribObject()
 	{
-		if (args.length != 2)
+		 try
 	    {
-	      System.out.println("Usage : java Producteur <machine du Serveur> <port du rmiregistry> <nom joueur> <comportement> ") ;
-	      System.exit(0) ;
-	    }
-	    try
-	    {
-	    	Joueur j = new Joueur(args[0], args[1], "joueur1" , 1);
-	    	Naming.rebind("rmi://" + args[0] + ":" + args[1] + '/' + j.nom ,j.inv) ;
+	    	Naming.rebind("rmi://" + rmiRegAddr + ":" + port + '/' + nomAgent , inv) ;
 			System.out.println("Serveur pret") ;
 			
 		}
 			catch (RemoteException re) { System.out.println(re) ; }
 			catch (MalformedURLException e) { System.out.println(e) ; }
+	}
+	
+	
+	public static void main(String [] args)
+	{
 		if (args.length != 2)
 	    {
-	      System.out.println("Usage : java Client <machine du Serveur> <port du rmiregistry>") ;
+	      System.out.println("Usage : java Producteur <machine du Serveur> <port du rmiregistry>") ;
 	      System.exit(0) ;
 	    }
+	    Joueur j = new Joueur(args[0], args[1]);
+	    j.distribObject() ;
+	   
 	 }
 }

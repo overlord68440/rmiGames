@@ -1,11 +1,10 @@
-limite_ress_ACC <0/1>
 ressource_depart_producteur <nb>
+limite_ress_ACC <true/false>
 max_ressource_accumulable <nbr>
 max_ressource_prenable <nbr>
-tour_par_tour <0/1>
-observation_possible <0/1>
-vole_possible <0/1>
-victoireMultiple <0/1>
-nbr_joueur <nbr>
-nbr_ressource <nbr>
-nom_ressource <nbr_prod> <nb_need_for_victory>
+tour_par_tour <true/false>
+observation_possible <true/false>
+vole_possible <true/false>
+victoireMultiple <true/false>
+player <comportement>
+ressource nom_ressource <nbr_prod> <nb_need_for_victory>

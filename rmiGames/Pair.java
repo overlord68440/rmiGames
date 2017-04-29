@@ -1,6 +1,7 @@
-
 public class Pair 
 {
+	private static final long serialVersionUID = 1L;
+	
 	private String str ;
 	private int n ;
 	

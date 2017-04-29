@@ -1,0 +1,17 @@
+ressource_depart_producteur 100
+limite_ress_ACC true
+max_ressource_accumulable 200
+max_ressource_prenable 10
+tour_par_tour false
+observation_possible false
+vole_possible true
+victoireMultiple false
+player 5
+player 3
+player 4
+player 1
+player 5
+ressource or 2 125
+ressource argent 1 75
+ressource mithril 4 100
+
