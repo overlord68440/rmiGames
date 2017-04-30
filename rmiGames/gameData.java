@@ -6,16 +6,12 @@ import java.rmi.* ;
 
 public interface gameData extends Remote
 {
-	public void finished(String nomJoueur)
+	public void finished()
 		throws RemoteException ;
-	  
-	public GameDataImpl clone()
+	  		
+	public Pair addNewPlayer() 
 		throws RemoteException ;
-		
-	public String addNewPlayer() 
-		throws RemoteException ;
-	public int getComportement(String name) 
-		throws RemoteException ;
+
 	public String addNewProd() 
 		throws RemoteException ;
 		

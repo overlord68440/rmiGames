@@ -6,8 +6,7 @@ import java.rmi.* ;
 
 public class Coordinateur extends Agent
 {
-	boolean joueurReady=false ;
-	boolean prodReady=false ;
+
 	GameDataImpl g ;
 	
 	public Coordinateur(String  rmiRegAddr, String port)
@@ -18,7 +17,7 @@ public class Coordinateur extends Agent
 		
 		try
 		{
-		g = new GameDataImpl() ;
+		g = new GameDataImpl(rmiRegAddr,port) ;
 		}
 		catch (RemoteException re) { System.out.println(re) ; }
 		
@@ -37,7 +36,6 @@ public class Coordinateur extends Agent
 		catch (MalformedURLException e) { System.out.println(e) ; }
 	}
 	
-	
 	public static void main(String [] args)
 	{		
 		if (args.length != 2)
@@ -48,5 +46,17 @@ public class Coordinateur extends Agent
 	    
 	    Coordinateur c = new Coordinateur(args[0], args[1]) ;
 		c.distribObject() ; 
+		while(!c.g.hasStart)
+		{
+				try{Thread.sleep(1000);} catch (InterruptedException e) {}
+				c.g.startGame() ;
+		}
+		
+		while(!c.g.end)
+		{
+				try{Thread.sleep(1000);} catch (InterruptedException e) {}
+		}
+		c.g.endGame() ;
+		System.exit(0) ;
 	}
 }

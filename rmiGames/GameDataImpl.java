@@ -1,20 +1,28 @@
 import java.lang.*;
 import java.util.* ;
 import java.io.*;
-import java.rmi.RemoteException ;
+import java.net.*;
+import java.rmi.* ;
 import java.rmi.server.UnicastRemoteObject ;
 
 
-public class GameDataImpl extends UnicastRemoteObject implements gameData
+public class GameDataImpl extends UnicastRemoteObject implements gameData, Serializable 
 {
 	private static final long serialVersionUID = 1L;
-	// var
 	
+	protected String rmiRegAddr ;
+	protected String port ;	
+	
+	// var
+	boolean joueurReady=false ;
+	boolean prodReady=false ;
+	boolean hasStart = false ;
 	int nbrPlayer = 0 ;		
 	List<Pair> listeProd = new ArrayList<Pair>() ;
 	List<Pair> victRess = new ArrayList<Pair>() ;
 	List<Pair> listeJoueur = new ArrayList<Pair>() ;
 	
+	public volatile boolean end = false ;
 	private boolean limiteRessAcc = false ;
 	private boolean tparTour = false ;
 	private boolean obsPossible = false ;
@@ -26,11 +34,13 @@ public class GameDataImpl extends UnicastRemoteObject implements gameData
 	private int maxRessourceAccumulable = 100 ;
 	// constructeur
 	
-	public GameDataImpl() throws RemoteException
+	public GameDataImpl(String rmiRegAddr, String port) throws RemoteException
 	{
 		super() ;
 		try
 		{
+			this.rmiRegAddr = rmiRegAddr ;
+			this.port = port ;
 			FileReader f = new FileReader("gameSetting.txt");
 			BufferedReader in = new BufferedReader(f);
 			String mess ;
@@ -162,49 +172,26 @@ public class GameDataImpl extends UnicastRemoteObject implements gameData
 		return maxRessourceAccumulable  ;
 	}
 	
-	public GameDataImpl clone() 
-	{
-		try 
-		{
-			return new GameDataImpl() ;
-		}
-		catch (RemoteException re) { System.out.println(re) ;}
-		return null ;
-		
-	}	
-	
 	//connect to game
 	
-	public String addNewPlayer() 
+	public Pair addNewPlayer() 
 	{
 		int i = 0 ;
 		while(listeJoueur.get(i).getN() <= 0 && i<listeJoueur.size())
-		{
 			i++ ;
-		}
+		
 		if(i>=listeJoueur.size())
-		{
-			return "full" ;
-		}
-		int n =listeJoueur.get(i).getN() ;
-		listeJoueur.get(i).setN(-n) ;
-		return listeJoueur.get(i).getStr() ;
-	}
-	
-	public int getComportement(String name) 
-	{
-		int i = 0 ;
-		while(listeJoueur.get(i).getStr().equals(name) && i<listeJoueur.size())
-		{
-			i++ ;
-		}
-		if(i>=listeJoueur.size())
-		{
-			return -1 ;
-		}
-		int n =listeJoueur.get(i).getN() ;
+			return new Pair("full",i) ;
+		
+		Pair p =new Pair(listeJoueur.get(i).getStr(),listeJoueur.get(i).getN()) ;
 		listeJoueur.get(i).setN(0) ;
-		return -n ;
+		
+		if(i == listeJoueur.size()-1)
+		{
+			joueurReady=true ;
+			System.out.println("all player here") ;
+		}
+		return p ;
 	}
 		
 	public String addNewProd() 
@@ -212,35 +199,161 @@ public class GameDataImpl extends UnicastRemoteObject implements gameData
 		
 		int i = 0 ;
 		while(listeProd.get(i).getN() == 0 && i<listeProd.size())
-		{
 			i++ ;
-		}
 		if(i>=listeProd.size())
-		{
 			return "full" ;
-		}
 		String s = listeProd.get(i).getStr() ;
 		listeProd.get(i).setN(0) ;
-		printProd() ;
+		if(i == listeProd.size()-1)
+		{
+			prodReady=true ;
+			System.out.println("all prod here") ;
+		}
 		return s ;
 	}
 	
-	// fin du game
-	public void finished(String nomJoueur)
+	
+	//demarre le jeu 
+	
+	public void startGame() 
 	{
-		if(condVictoire)
+		if(prodReady && joueurReady)
 		{
-			
-		}
-		else
-		{
-			endGame() ;
+			try{Thread.sleep(2000);} catch (InterruptedException e) {}
+			try 
+			{
+				for (int i = 0; i < listeProd.size(); i++) 
+				{
+					produire p = (produire) Naming.lookup("rmi://" + rmiRegAddr + ":" + port + '/' + listeProd.get(i).getStr()); 
+					p.start() ;
+				}
+				for (int i = 0; i < listeJoueur.size(); i++) 
+				{
+					inventaire j = (inventaire) Naming.lookup("rmi://" + rmiRegAddr + ":" + port + '/' + listeJoueur.get(i).getStr()); 
+					j.start() ;
+				}
+				hasStart=true ;
+				System.out.println("game started") ;
+			}
+			catch (NotBoundException re) { System.out.println(re) ; }
+			catch (RemoteException re) { System.out.println(re) ; }
+			catch (MalformedURLException e) { System.out.println(e) ; }	
 		}
 	}
 	
-	private void endGame()
+	// fin du game	
+	public void killAllAgent(List<inventaire> jlist)
 	{
+		try
+		{
 		
+			for (int i = 0; i < listeJoueur.size(); i++) 
+			{
+				inventaire j = (inventaire) Naming.lookup("rmi://" + rmiRegAddr + ":" + port + '/' + listeJoueur.get(i).getStr()); 
+				j.endJoueur() ;
+			}
+			for (int i = 0; i < listeProd.size(); i++) 
+			{
+				produire p = (produire) Naming.lookup("rmi://" + rmiRegAddr + ":" + port + '/' + listeProd.get(i).getStr()); 
+				p.endProd() ;
+			}
+			System.out.println("all killed") ;
+		}
+		catch (NotBoundException re) { System.out.println(re) ; }
+		catch (RemoteException re) { System.out.println(re) ; }
+		catch (MalformedURLException e) { System.out.println(e) ; }	
+	}
+	
+	public int calculPoint(List<Pair> inv)
+	{
+		int n=0 ;
+		for (int i = 0; i < inv.size(); i++) 
+		{
+			int a = inv.get(i).getN() ;
+			int b =	victRess.get(i).getN() ;		
+			if(a>= b )
+			{
+				n+=1000 ;
+				n+= a-b ;
+			}
+			else
+				n+=a ;
+		}
+		return n ;
+	}
+	
+	private void writeGameStats(List<Integer> p)
+	{
+		int n = 1 ;
+		String s ="statsGame" + n + ".txt"  ;
+		File f = new File(s);
+		
+		while(f.exists())
+		{
+			n++ ;
+			s = "statsGame" + n + ".txt" ;
+			f = new File("statsGame" + n + ".txt");
+		}
+		
+		try
+		{
+			f.createNewFile() ;
+			BufferedReader in = new BufferedReader(new FileReader ("gameSetting.txt"));
+			PrintWriter out = new PrintWriter(s);
+			String line ;
+			while((line = in.readLine()) != null)
+			{
+				out.write(line +'\n');
+			}
+			in.close() ;
+			out.write("game stats : \n") ;
+			System.out.println("size p : " + p.size()) ;
+			for (int i = 0; i < p.size(); i++) 
+			{
+				out.write("player" + i + " " + p.get(i) + "\n") ;
+			}
+			out.close() ;
+			
+		}
+		catch (IOException e) { e.printStackTrace() ; }
+	}
+	
+	public void endGame()
+	{
+		List<inventaire> jlist = new ArrayList<inventaire>() ;
+		List<Integer> point = new ArrayList<Integer>() ;
+		try 
+		{
+			for (int i = 0; i < listeJoueur.size(); i++) 
+			{
+					System.out.println("player stop : " + listeJoueur.get(i).getStr()) ;
+					inventaire j = (inventaire) Naming.lookup("rmi://" + rmiRegAddr + ":" + port + '/' + listeJoueur.get(i).getStr()); 
+					j.stop() ;
+					jlist.add(j) ;
+			}
+			for (int i = 0; i < jlist.size(); i++) 
+			{
+				point.add(calculPoint(jlist.get(i).obsInv())) ;
+			}
+			
+			writeGameStats(point) ;
+			killAllAgent(jlist) ;
+		}
+		catch (NotBoundException re) { System.out.println(re) ; }
+		catch (RemoteException re) { System.out.println(re) ; }
+		catch (MalformedURLException e) { System.out.println(e) ; }	
+	}
+	
+	public void finished()
+	{
+		if(condVictoire)
+		{
+			//TODO
+		}
+		else
+		{
+			end = true ;
+		}
 	}
 	
 	// debug
@@ -255,6 +368,4 @@ public class GameDataImpl extends UnicastRemoteObject implements gameData
 		for(int i = 0; i < listeProd.size(); i++)
 			System.out.println("prod : " +  listeProd.get(i).getStr() + " , c = " +  listeProd.get(i).getN());
 	}
-	
 }
-

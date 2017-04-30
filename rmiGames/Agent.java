@@ -6,9 +6,9 @@ import java.rmi.* ;
 
 public abstract class Agent 
 {
-	String nomAgent ;
-	String rmiRegAddr ;
-	String port ;	
+	protected String nomAgent ;
+	protected String rmiRegAddr ;
+	protected String port ;	
 	
 	public abstract void distribObject() ;
 	
@@ -18,8 +18,6 @@ public abstract class Agent
 	{
 		try 
 		{
-			System.out.println(this.rmiRegAddr) ;
-			System.out.println(this.port) ;
 			gameData g = (gameData) Naming.lookup("rmi://" + rmiRegAddr + ":" + port + "/gameSettings") ;
 			getUsefulData(g) ;
 		}
@@ -29,6 +27,13 @@ public abstract class Agent
 	}	
 	
 	
-	
-	
+	public String getNameRess(String s)
+	{
+		for(int i =0; i<s.length(); i++)
+		{
+			if(s.charAt(i) >= '0' && s.charAt(i) <= '9')
+				return s.substring(0,i) ;
+		}
+		return s ;
+	}
 }
