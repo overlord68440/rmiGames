@@ -257,7 +257,7 @@ public class GameDataImpl extends UnicastRemoteObject implements gameData, Seria
 				produire p = (produire) Naming.lookup("rmi://" + rmiRegAddr + ":" + port + '/' + listeProd.get(i).getStr()); 
 				p.endProd() ;
 			}
-			System.out.println("all killed") ;
+			System.out.println("all finished") ;
 		}
 		catch (NotBoundException re) { System.out.println(re) ; }
 		catch (RemoteException re) { System.out.println(re) ; }
@@ -346,14 +346,14 @@ public class GameDataImpl extends UnicastRemoteObject implements gameData, Seria
 	
 	public void finished()
 	{
-		if(condVictoire)
+		/*if(condVictoire)
 		{
 			//TODO
 		}
 		else
-		{
+		{*/
 			end = true ;
-		}
+		//}
 	}
 	
 	// debug

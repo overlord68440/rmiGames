@@ -1,6 +1,7 @@
 *.class
 ProjetSD*
 rmiGames/statsGame*
+compte*
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

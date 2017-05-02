@@ -2,9 +2,9 @@ ressource_depart_producteur <nb>
 limite_ress_ACC <true/false>
 max_ressource_accumulable <nbr>
 max_ressource_prenable <nbr>
-tour_par_tour <true/false>
+tour_par_tour <true/false>			// aucun effet pour le moment
 observation_possible <true/false>
-vole_possible <true/false>
-victoireMultiple <true/false>
-player <comportement>
-ressource nom_ressource <nbr_prod> <nb_need_for_victory>
+vole_possible <true/false>			
+victoireMultiple <true/false>		//aucun effet pour le moment 
+player <comportement>				// un numéro correspond a un comportement différent seulement le n°2 est disponible pour le moment(aleatoire)
+ressource nom_ressource <nbr_producteur> <nb_need_for_victory>
